@@ -7,16 +7,54 @@
 </head>
 <body>
     <h1>Settings</h1>
+    <!-- Back to Home Button -->
     <button onclick="window.location.href='/'">Back to Home</button>
 
-    <!-- Button to delete all flashcards -->
+    <!-- Delete All Flashcards -->
     <h2>Delete All Flashcards</h2>
-    <button onclick="fetch('http://localhost:5003/delete_flashcard', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ word: 'all' })}).then(response => response.json()).then(data => alert(data.message)).catch(error => alert('Error: ' + error));">Delete All Flashcards</button>
+    <button onclick="deleteAllFlashcards()">Delete All Flashcards</button>
 
-    <!-- Button to shuffle flashcards -->
+    <!-- Shuffle Flashcards -->
     <h2>Shuffle Flashcards</h2>
-    <button onclick="fetch('http://localhost:5004/shuffle_flashcards', {method: 'POST'}).then(response => response.json()).then(data => alert(data.message)).catch(error => alert('Error: ' + error));">Shuffle Flashcards</button>
+    <button onclick="shuffleFlashcards()">Shuffle Flashcards</button>
 
+    <script>
+        // Function to delete all flashcards
+        function deleteAllFlashcards() {
+            if (confirm("Are you sure you want to delete all flashcards? This action cannot be undone.")) {
+                fetch('http://localhost:5003/delete_all_flashcards', {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert(data.message);
+                        // Optionally reload the page or update the UI
+                        location.reload();
+                    }
+                })
+                .catch(error => alert("Error deleting all flashcards: " + error.message));
+            }
+        }
 
+        // Function to shuffle flashcards
+        function shuffleFlashcards() {
+            fetch('http://localhost:5004/shuffle_flashcards', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                    // Optionally reload the page or update the UI
+                }
+            })
+            .catch(error => alert("Error shuffling flashcards: " + error.message));
+        }
+    </script>
 </body>
 </html>

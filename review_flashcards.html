@@ -5,94 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Flashcards</title>
     <script>
-        // Function to fetch the next flashcard and display it
-        function loadNextFlashcard() {
-            fetch('http://localhost:5002/review/next')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.error) {
-                        console.error('Error fetching flashcard:', data.error);
-                        alert(data.error);
-                    } else {
-                        console.log('Received flashcard:', data);
-                        document.getElementById('flashcardQuestion').innerText = data.question || "No question available";
-                        document.getElementById('flashcardAnswer').innerText = ""; // Clear the answer initially
-                        document.getElementById('flashcardAnswer').style.display = 'none'; // Hide the answer initially
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                    alert('Error fetching data: ' + error.message);
-                });
-        }
-
-        // Load the first flashcard when the page is loaded
-        window.onload = function() {
+        // Load the first flashcard when the page loads
+        window.onload = function () {
             loadNextFlashcard();
         };
 
-        // Fetch the answer from the backend and display it
-        function revealAnswer() {
-            fetch('http://localhost:5002/review/reveal')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+        // Fetch the next flashcard and display it
+        function loadNextFlashcard() {
+            fetch('http://localhost:5002/review/next')
+                .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        console.error('Error fetching answer:', data.error);
-                        alert(data.error);
+                        if (data.error === "All questions have been reviewed") {
+                            alert("You have reviewed all available questions!");
+                            window.location.href = "/results"; // Redirect to results page
+                        } else {
+                            alert(data.error); // Handle other errors
+                        }
                     } else {
-                        console.log('Received answer:', data);
-                        const answerElement = document.getElementById('flashcardAnswer');
-                        answerElement.innerText = data.answer || "No answer available"; // Update the answer element
-                        answerElement.style.display = 'block'; // Make the answer visible
+                        // Display the question and reset the answer display
+                        document.getElementById('flashcardQuestion').innerText = data.question || "No question available";
+                        document.getElementById('flashcardAnswer').innerText = ""; // Clear any previous answer
+                        document.getElementById('flashcardAnswer').style.display = 'none'; // Hide the answer initially
                     }
                 })
-                .catch(error => {
-                    console.error('Error fetching answer:', error);
-                    alert('Error fetching answer: ' + error.message);
-                });
+                .catch(error => alert("Error fetching next flashcard: " + error.message));
         }
 
+        // Fetch the answer for the current flashcard
+        function revealAnswer() {
+            fetch('http://localhost:5002/review/reveal')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        document.getElementById('flashcardAnswer').innerText = data.answer || "No answer available";
+                        document.getElementById('flashcardAnswer').style.display = 'block'; // Show the answer
+                    }
+                })
+                .catch(error => alert("Error revealing answer: " + error.message));
+        }
+
+        // Submit whether the answer was correct or incorrect
         function submitAnswer(correct) {
             fetch('http://localhost:5002/review/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ correct: correct })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-                loadNextFlashcard(); // Load the next flashcard after submission
-            })
-            .catch(error => console.error('Error submitting answer:', error));
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === "All questions reviewed") {
+                        alert("You have reviewed all available questions!");
+                        window.location.href = "/results";
+                    } else {
+                        alert(data.message);
+                        loadNextFlashcard(); // Load the next flashcard
+                    }
+                })
+                .catch(error => alert("Error submitting answer: " + error.message));
         }
 
+        // End the review session and show results
         function endReview() {
             fetch('http://localhost:5002/end_review')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     alert(`Review session ended.\nTotal Questions: ${data.total}\nCorrect Answers: ${data.correct}\nIncorrect Answers: ${data.incorrect}`);
+                    window.location.href = "/results"; // Redirect to the results page
                 })
-                .catch(error => console.error('Error ending review:', error));
+                .catch(error => alert("Error ending review: " + error.message));
         }
 
         function skipQuestion() {
@@ -100,25 +83,78 @@
             loadNextFlashcard(); // Load the next flashcard without affecting stats
         }
 
+        function shuffleFlashcards() {
+            // Display confirmation prompt
+            if (!confirm("Are you sure you want to shuffle the flashcards? This will restart the session.")) {
+                return; // Exit the function if the user cancels
+            }
+
+            // Proceed with shuffling if confirmed
+            fetch('http://localhost:5004/shuffle_flashcards', { method: 'POST' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message); // Notify the user that flashcards are shuffled
+                    location.reload(); // Reload the page to reflect the new order
+                })
+                .catch(error => {
+                    console.error('Error shuffling flashcards:', error);
+                    alert('Error shuffling flashcards: ' + error.message);
+                });
+        }
+
+        function deleteCurrentFlashcard() {
+            const question = document.getElementById('flashcardQuestion').innerText;
+
+            fetch('http://localhost:5003/delete_flashcard', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert(data.message);
+                        loadNextFlashcard(); // Load the next flashcard after deletion
+                    }
+                })
+                .catch(error => alert("Error deleting flashcard: " + error.message));
+        }
+
     </script>
 </head>
 <body>
     <h1>Review Flashcards</h1>
     <button onclick="window.location.href='/'">Back to Home</button>
-    <div id="flashcardReviewSection">
-        <h2>Flashcard Review</h2>
-        <div id="flashcardBox">
-            <p id="flashcardQuestion">Loading question...</p>
-            <p id="flashcardAnswer" style="display:none;">The answer will be displayed here.</p>
+        <div id="flashcardReviewSection">
+            <h2>Flashcard Review</h2>
+            <div id="flashcardBox">
+                <p id="flashcardQuestion">Loading question...</p>
+                <p id="flashcardAnswer" style="display:none;">The answer will be displayed here.</p>
+            </div>
+            <div id="answerButtons">
+                <button onclick="revealAnswer()">Reveal Answer</button>
+                <button onclick="submitAnswer(true)">Mark as Correct</button>
+                <button onclick="submitAnswer(false)">Mark as Incorrect</button>
+                <button onclick="skipQuestion()">Skip Question</button>
+                <button onclick="deleteCurrentFlashcard()">Delete This Question</button>
+            </div>
         </div>
-        <div id="answerButtons">
-            <button onclick="revealAnswer()">Reveal Answer</button>
-            <button onclick="submitAnswer(true)">Mark as Correct</button>
-            <button onclick="submitAnswer(false)">Mark as Incorrect</button>
-            <button onclick="skipQuestion()">Skip Question</button> <!-- New Next Button -->
-        </div>
-    </div>
-    <button onclick="endReview()">End Review Session</button>
+
+        <!-- Shuffle Button -->
+        <h3>Shuffle Questions</h3>
+        <button onclick="shuffleFlashcards()">Shuffle Flashcards</button>
+
+        <!-- End Review Button -->
+        <h3>End Session - View Results</h3>
+        <button onclick="endReview()">End Review Session</button>
+
 </body>
 </html>
 
