@@ -4,8 +4,8 @@ Description
 The Remove Task Microservice processes DELETE requests to remove tasks from the data.tsv file based on a unique task ID. It is part of a larger task management application.
 
 How to Use the Remove Microservice
-Endpoint:
 
+Endpoint:
 URL: http://localhost:8002/remove/:id
 Method: DELETE
 Request:
