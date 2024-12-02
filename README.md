@@ -105,6 +105,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Contact
 
-For any questions, suggestions, or issues, please open an issue on the repository or contact the project maintainer.
+For any questions, suggestions, or issues, please open an issue on the repository or contact me through GitHub.
 
 
