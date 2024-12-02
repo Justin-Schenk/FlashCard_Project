@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Results</title>
-</head>
-<body>
-    <h1>Review Session Results</h1>
-    <div id="resultsSection">
-        <p>Total Questions Answered: <span id="totalQuestions"></span></p>
-        <p>Correct Answers: <span id="correctAnswers"></span></p>
-    </div>
-    <button onclick="window.location.href='/'">Back to Home</button>
-
     <script>
         // Fetch results from the backend service
-        fetch('http://localhost:5002/end_review')
+        fetch('http://localhost:5002/review/results')
             .then(response => response.json())
             .then(data => {
-                document.getElementById('totalQuestions').innerText = data.total;
+                document.getElementById('totalQuestions').innerText = data.total_questions;
                 document.getElementById('correctAnswers').innerText = data.correct;
+                document.getElementById('incorrectAnswers').innerText = data.incorrect;
+                document.getElementById('skippedQuestions').innerText = data.skipped;
             })
             .catch(error => alert('Error fetching results: ' + error));
     </script>
+</head>
+<body>
+    <h1>Review Session Results</h1>
+    <p>Total Questions Attempted: <span id="totalQuestions">Loading...</span></p>
+    <p>Correct Answers: <span id="correctAnswers">Loading...</span></p>
+    <p>Incorrect Answers: <span id="incorrectAnswers">Loading...</span></p>
+    <p>Skipped Questions: <span id="skippedQuestions">Loading...</span></p>
+    <button onclick="window.location.href='/'">Back to Home</button>
 </body>
 </html>

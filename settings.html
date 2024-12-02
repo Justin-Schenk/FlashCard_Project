@@ -15,8 +15,17 @@
     <button onclick="deleteAllFlashcards()">Delete All Flashcards</button>
 
     <!-- Shuffle Flashcards -->
-    <h2>Shuffle Flashcards</h2>
-    <button onclick="shuffleFlashcards()">Shuffle Flashcards</button>
+    <h2>Flashcard Session Settings</h2>
+    <button onclick="shuffleFlashcardsSession()">Shuffle Flashcards for This Session</button>
+    <button onclick="endShuffleSession()">End Shuffle Session</button>
+
+    <!-- Shuffle Status Indicator -->
+    <h3>Shuffle Status</h3>
+    <div id="shuffle-status">Loading shuffle status...</div>
+
+    <!-- Reset Statistics and Flashcards -->
+    <h3>Reset Statistics and Flashcards</h3>
+    <button onclick="resetReviewSession()">Reset</button>
 
     <script>
         // Function to delete all flashcards
@@ -39,9 +48,9 @@
             }
         }
 
-        // Function to shuffle flashcards
-        function shuffleFlashcards() {
-            fetch('http://localhost:5004/shuffle_flashcards', {
+        // Function to begin and end shuffled study sessions
+        function shuffleFlashcardsSession() {
+            fetch('http://localhost:5004/shuffle_flashcards_session', {
                 method: 'POST'
             })
             .then(response => response.json())
@@ -50,11 +59,61 @@
                     alert(data.error);
                 } else {
                     alert(data.message);
-                    // Optionally reload the page or update the UI
+                    checkShuffleSession(); // Update shuffle status after starting session
                 }
             })
-            .catch(error => alert("Error shuffling flashcards: " + error.message));
+            .catch(error => alert("Error starting shuffle session: " + error.message));
         }
+
+        function endShuffleSession() {
+            fetch('http://localhost:5004/end_shuffle_session', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                    checkShuffleSession(); // Update shuffle status after ending session
+                }
+            })
+            .catch(error => alert("Error ending shuffle session: " + error.message));
+        }
+
+        // Function to reset the review session
+        function resetReviewSession() {
+            fetch('http://localhost:5002/review/reset', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                window.location.reload(); // Reload the page to reflect the reset
+            })
+            .catch(error => alert("Error resetting session: " + error.message));
+        }
+
+        // Check if a shuffle session is active
+        function checkShuffleSession() {
+            fetch('http://localhost:5004/is_session_active', {
+                method: 'GET'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.session_active) {
+                        document.getElementById('shuffle-status').innerText = "Shuffle Session Active";
+                        document.getElementById('shuffle-status').style.color = "green";
+                    } else {
+                        document.getElementById('shuffle-status').innerText = "Shuffle Session NOT Active";
+                        document.getElementById('shuffle-status').style.color = "red";
+                    }
+                })
+                .catch(error => console.error("Error checking shuffle session: " + error.message));
+        }
+
+        // Call the check function when the page loads to show the current shuffle status
+        window.onload = checkShuffleSession;
     </script>
 </body>
 </html>
