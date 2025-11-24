@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Flashcards</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Create or Upload Flashcards</h1>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/create_flashcards">Create</a>
+            <a href="/review_flashcards">Review</a>
+            <a href="/settings">Settings</a>
+        </nav>
+
+        <h2>Upload Flashcards from CSV</h2>
+
+        <p><strong>Accepted format:</strong></p>
+        <pre>
+question,answer
+What is "hola"?,hello
+        </pre>
+
+        <form id="uploadFlashcardsForm"
+              action="http://localhost:5001/upload_flashcards"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <input type="file" id="csvFile" name="file" accept=".csv" required>
+            <button type="submit">Upload CSV</button>
+        </form>
+
+        <h2>Add a Flashcard</h2>
+
+        <form id="addFlashcardForm"
+              action="http://localhost:5001/add_flashcard"
+              method="POST">
+
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" required>
+
+            <label for="answer">Answer:</label>
+            <input type="text" id="answer" name="answer" required>
+
+            <button type="submit">Add Flashcard</button>
+        </form>
+
+        <h2>Finished Creating? Proceed to Review</h2>
+
+        <button onclick="window.location.href='/review_flashcards'">
+            Proceed to Review
+        </button>
+
+    </div>
+
+    <script>
+        // Handle Upload Flashcards Form Submission
+        document.getElementById("uploadFlashcardsForm").addEventListener("submit", function(event) {
+            event.preventDefault(); 
+            const formData = new FormData(event.target);
+
+            fetch(event.target.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                window.location.reload();
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+
+        // Handle Add Flashcard Form Submission
+        document.getElementById("addFlashcardForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+
+            fetch(event.target.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                window.location.reload();
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+    </script>
+
+</body>
+</html>

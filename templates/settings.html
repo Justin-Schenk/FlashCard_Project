@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Settings</h1>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/create_flashcards">Create</a>
+            <a href="/review_flashcards">Review</a>
+            <a href="/settings">Settings</a>
+        </nav>
+
+        <h2>Delete All Flashcards</h2>
+        <button onclick="deleteAllFlashcards()">Delete All Flashcards</button>
+
+        <h2>Flashcard Session Settings</h2>
+        <button onclick="shuffleFlashcardsSession()">Shuffle Flashcards for This Session</button>
+        <button onclick="endShuffleSession()">End Shuffle Session</button>
+
+        <h3>Shuffle Status</h3>
+        <p id="shuffle-status">Loading shuffle status...</p>
+
+        <h3>Reset Statistics and Review Progress</h3>
+        <button onclick="resetReviewSession()">Reset Review Session</button>
+
+    </div>
+
+    <script>
+        function deleteAllFlashcards() {
+            if (confirm("Delete ALL flashcards? This cannot be undone.")) {
+                fetch('http://localhost:5003/delete_all_flashcards', {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error);
+                    location.reload();
+                })
+                .catch(error => alert("Error deleting flashcards: " + error.message));
+            }
+        }
+
+        function shuffleFlashcardsSession() {
+            fetch('http://localhost:5004/shuffle_flashcards_session', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error);
+                    checkShuffleSession();
+                })
+                .catch(error => alert("Error starting shuffle session: " + error.message));
+        }
+
+        function endShuffleSession() {
+            fetch('http://localhost:5004/end_shuffle_session', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || data.error);
+                    checkShuffleSession();
+                })
+                .catch(error => alert("Error ending shuffle session: " + error.message));
+        }
+
+        function resetReviewSession() {
+            fetch('http://localhost:5002/review/reset', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => alert("Error resetting session: " + error.message));
+        }
+
+        function checkShuffleSession() {
+            fetch('http://localhost:5004/is_session_active')
+                .then(response => response.json())
+                .then(data => {
+                    const status = document.getElementById('shuffle-status');
+                    if (data.session_active) {
+                        status.innerText = "Shuffle Session Active";
+                        status.style.color = "green";
+                    } else {
+                        status.innerText = "Shuffle Session NOT Active";
+                        status.style.color = "red";
+                    }
+                })
+                .catch(error => console.error("Error checking shuffle status:", error));
+        }
+
+        window.onload = checkShuffleSession;
+    </script>
+
+</body>
+</html>

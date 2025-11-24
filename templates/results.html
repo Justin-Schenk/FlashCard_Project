@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Results</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script>
+        window.onload = () => {
+            fetch('http://localhost:5002/review/results')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalQuestions').innerText = data.total_questions;
+                    document.getElementById('correctAnswers').innerText = data.correct;
+                    document.getElementById('incorrectAnswers').innerText = data.incorrect;
+                    document.getElementById('skippedQuestions').innerText = data.skipped;
+                })
+                .catch(error => alert('Error fetching results: ' + error));
+        };
+    </script>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>Review Session Results</h1>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/create_flashcards">Create</a>
+            <a href="/review_flashcards">Review</a>
+            <a href="/settings">Settings</a>
+        </nav>
+
+        <h2>Summary</h2>
+
+        <p><strong>Total Questions Attempted:</strong> <span id="totalQuestions">Loading...</span></p>
+        <p><strong>Correct Answers:</strong> <span id="correctAnswers">Loading...</span></p>
+        <p><strong>Incorrect Answers:</strong> <span id="incorrectAnswers">Loading...</span></p>
+        <p><strong>Skipped Questions:</strong> <span id="skippedQuestions">Loading...</span></p>
+
+        <h3>Next Steps</h3>
+        <p>You can return to the Review page if you want to study again, or go to Settings to reset progress.</p>
+
+        <button onclick="window.location.href='/'">Back to Home</button>
+
+    </div>
+</body>
+</html>
