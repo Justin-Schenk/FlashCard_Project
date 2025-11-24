@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/static/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Flashcards</title>
+    <link rel="stylesheet" href="/static/style.css">
+
     <script>
-        // Track if the answer has been revealed for the current question
         let answerRevealed = false;
 
-        // Load the first flashcard when the page loads
         window.onload = function () {
             loadNextFlashcard();
-            checkShuffleSession(); // Check if a shuffle session is active when the page loads
+            checkShuffleSession();
         };
 
-        // Load the next flashcard
         function loadNextFlashcard() {
             fetch('http://localhost:5002/review/next')
                 .then(response => response.json())
@@ -23,32 +21,27 @@
                     if (data.error) {
                         if (data.error === "All questions have been reviewed") {
                             alert("You have reviewed all available questions!");
-                            window.location.href = "/results"; // Redirect to results page
+                            window.location.href = "/results";
                         } else {
-                            alert(data.error); // Handle other errors
+                            alert(data.error);
                         }
                     } else {
-                        // Display the question and reset the answer display
                         document.getElementById('flashcardQuestion').innerText = data.question || "No question available";
-                        document.getElementById('flashcardAnswer').innerText = ""; // Clear any previous answer
-                        document.getElementById('flashcardAnswer').style.display = 'none'; // Hide the answer initially
+                        document.getElementById('flashcardAnswer').innerText = "";
+                        document.getElementById('flashcardAnswer').style.display = 'none';
 
-                        // Reset the state for the buttons
                         answerRevealed = false;
-                        document.getElementById('revealButton').disabled = false; // Enable the reveal button
-                        document.getElementById('skipButton').disabled = false;   // Enable the skip button
-                        document.getElementById('correctButton').disabled = true; // Disable correct button
-                        document.getElementById('incorrectButton').disabled = true; // Disable incorrect button
+                        document.getElementById('revealButton').disabled = false;
+                        document.getElementById('skipButton').disabled = false;
+                        document.getElementById('correctButton').disabled = true;
+                        document.getElementById('incorrectButton').disabled = true;
                     }
                 })
                 .catch(error => alert("Error fetching next flashcard: " + error.message));
         }
 
-        // Fetch the answer for the current flashcard
         function revealAnswer() {
-            if (answerRevealed) {
-                return; // Prevent multiple clicks on "Reveal Answer"
-            }
+            if (answerRevealed) return;
 
             fetch('http://localhost:5002/review/reveal')
                 .then(response => response.json())
@@ -57,16 +50,12 @@
                         alert(data.error);
                     } else {
                         document.getElementById('flashcardAnswer').innerText = data.answer || "No answer available";
-                        document.getElementById('flashcardAnswer').style.display = 'block'; // Show the answer
+                        document.getElementById('flashcardAnswer').style.display = 'block';
 
-                        // Set the state to indicate that the answer has been revealed
                         answerRevealed = true;
 
-                        // Disable the reveal and skip buttons
                         document.getElementById('revealButton').disabled = true;
                         document.getElementById('skipButton').disabled = true;
-
-                        // Enable the correct and incorrect buttons
                         document.getElementById('correctButton').disabled = false;
                         document.getElementById('incorrectButton').disabled = false;
                     }
@@ -74,7 +63,6 @@
                 .catch(error => alert("Error revealing answer: " + error.message));
         }
 
-        // Submit whether the answer was correct or incorrect
         function submitAnswer(correct) {
             if (!answerRevealed) {
                 alert("Please reveal the answer before submitting your response.");
@@ -93,43 +81,35 @@
                         window.location.href = "/results";
                     } else {
                         alert(data.message);
-                        loadNextFlashcard(); // Load the next flashcard
+                        loadNextFlashcard();
                     }
                 })
                 .catch(error => alert("Error submitting answer: " + error.message));
         }
 
-        // End the review session and show results
         function endReview() {
-            fetch('http://localhost:5002/review/end', {
-                method: 'POST'
-            })
+            fetch('http://localhost:5002/review/end', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
-                    alert(`Review session ended.\nTotal Questions: ${data.total_questions}\nCorrect Answers: ${data.correct}\nIncorrect Answers: ${data.incorrect}\nSkipped Questions: ${data.skipped}`);
-                    window.location.href = "/results"; // Redirect to the results page
+                    alert(`Review session ended.\nTotal Questions: ${data.total_questions}\nCorrect: ${data.correct}\nIncorrect: ${data.incorrect}\nSkipped: ${data.skipped}`);
+                    window.location.href = "/results";
                 })
-
                 .catch(error => alert("Error ending review: " + error.message));
         }
 
-        // Skip the current flashcard
         function skipFlashcard() {
-            fetch('http://localhost:5002/review/skip', {
-                method: 'POST'
-            })
+            fetch('http://localhost:5002/review/skip', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        alert(data.error); // Handle errors
+                        alert(data.error);
                     } else {
-                        loadNextFlashcard(); // Load the next flashcard after skipping
+                        loadNextFlashcard();
                     }
                 })
                 .catch(error => alert("Error skipping flashcard: " + error.message));
         }
 
-        // Delete the current flashcard
         function deleteCurrentFlashcard() {
             const question = document.getElementById('flashcardQuestion').innerText;
 
@@ -144,64 +124,63 @@
                         alert(data.error);
                     } else {
                         alert(data.message);
-                        loadNextFlashcard(); // Load the next flashcard after deletion
+                        loadNextFlashcard();
                     }
                 })
                 .catch(error => alert("Error deleting flashcard: " + error.message));
         }
 
-        // Check if a shuffle session is active
         function checkShuffleSession() {
-            fetch('http://localhost:5004/is_session_active', {
-                method: 'GET'
-            })
+            fetch('http://localhost:5004/is_session_active')
                 .then(response => response.json())
                 .then(data => {
+                    const status = document.getElementById('shuffle-status');
                     if (data.session_active) {
-                        document.getElementById('shuffle-status').innerText = "Shuffle Session Active";
-                        document.getElementById('shuffle-status').style.color = "green";
+                        status.innerText = "Shuffle Session Active";
+                        status.style.color = "green";
                     } else {
-                        document.getElementById('shuffle-status').innerText = "Shuffle Session NOT Active";
-                        document.getElementById('shuffle-status').style.color = "red";
+                        status.innerText = "Shuffle Session NOT Active";
+                        status.style.color = "red";
                     }
                 })
-                .catch(error => console.error("Error checking shuffle session: " + error.message));
+                .catch(error => console.error("Error checking shuffle: " + error.message));
         }
-
     </script>
 </head>
-<body>
-    <h1>Review Flashcards</h1>
-    <!-- Home Button -->
-    <button onclick="window.location.href='/'">Back to Home</button>
 
-    <!-- Flashcard Review Section -->
-    <div id="flashcardReviewSection">
+<body>
+    <div class="container">
+
+        <h1>Review Flashcards</h1>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/create_flashcards">Create</a>
+            <a href="/review_flashcards">Review</a>
+            <a href="/settings">Settings</a>
+        </nav>
+
         <h2>Flashcard Review</h2>
+
         <div id="flashcardBox">
             <p id="flashcardQuestion">Loading question...</p>
-            <p id="flashcardAnswer" style="display:none;">The answer will be displayed here.</p>
+            <p id="flashcardAnswer" style="display:none;">The answer will appear here</p>
         </div>
+
         <div id="answerButtons">
             <button id="revealButton" onclick="revealAnswer()">Reveal Answer</button>
-            <button id="correctButton" onclick="submitAnswer(true)" disabled>Mark as Correct</button>
-            <button id="incorrectButton" onclick="submitAnswer(false)" disabled>Mark as Incorrect</button>
-            <button id="skipButton" onclick="skipFlashcard()">Skip Question</button>
-            <button onclick="deleteCurrentFlashcard()">Delete This Question</button>
+            <button id="correctButton" onclick="submitAnswer(true)" disabled>Mark Correct</button>
+            <button id="incorrectButton" onclick="submitAnswer(false)" disabled>Mark Incorrect</button>
+            <button id="skipButton" onclick="skipFlashcard()">Skip</button>
+            <button onclick="deleteCurrentFlashcard()">Delete</button>
         </div>
+
+        <h3>Shuffle Status</h3>
+        <p id="shuffle-status"></p>
+
+        <h3>End Session</h3>
+        <button onclick="endReview()">End Review Session</button>
+
     </div>
-    <br>
-    <!-- Shuffle Session Indicator -->
-    <div id="shuffle-status"></div>
-
-
-    <!-- End Review Button -->
-    <h3>End Session - View Results</h3>
-    <button onclick="endReview()">End Review Session</button>
 </body>
 </html>
-
-
-
-
-
