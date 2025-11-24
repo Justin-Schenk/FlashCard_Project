@@ -70,3 +70,30 @@ cd FlashCard_Project
 
 # Install dependencies
 pip install flask flask-cors pandas
+```
+Running the Services
+
+### Open five terminals in this directory and run:
+
+# 1. UI service
+python main.py
+
+# 2. Creation service (port 5001)
+python flashcard_creation_service.py
+
+# 3. Review service (port 5002)
+python flashcard_review_service.py
+
+# 4. Delete service (port 5003)
+python flashcard_delete_service.py
+
+# 5. Shuffle service (port 5004)
+python flashcard_shuffle_service.py
+
+
+Then open a browser and visit:
+
+http://localhost:5000
+
+
+You should see the home page with navigation to create, review, and settings.
