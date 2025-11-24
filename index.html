@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/static/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcard Management UI</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
-    <h1>Flashcard Management App</h1>
+    <div class="container">
 
-    <!-- Navigation Menu -->
-    <h2>Navigation</h2>
-    <button onclick="window.location.href='/create_flashcards'">Create Flashcards</button>
-    <button onclick="window.location.href='/review_flashcards'">Review Flashcards</button>
-    <button onclick="window.location.href='/settings'">Settings</button>
+        <h1>Flashcard Management App</h1>
 
+        <nav>
+            <a href="/">Home</a>
+            <a href="/create_flashcards">Create</a>
+            <a href="/review_flashcards">Review</a>
+            <a href="/settings">Settings</a>
+        </nav>
 
+        <p>Welcome to the Flashcard Management App. Use the navigation above to create new flashcards, review your existing ones, or access settings.</p>
+
+    </div>
 </body>
 
 </html>
