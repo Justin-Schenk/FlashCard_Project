@@ -1,110 +1,72 @@
-Flashcard Web Application
+# Flashcard Web Application (CS 361 Microservices Project)
 
-Overview
+## Overview
 
-This project was developed as part of the CS361 course over the span of approximately 8 weeks during an 11-week term. The goal was to apply concepts of microservices and software engineering to create a fully functional flashcard web application. It is truly a work in progress.
+This project is a microservices-based flashcard web application built for CS 361 over an 8-week period.  
+The goal was to practice software engineering concepts (requirements, design, testing) and microservice architecture while building a usable study tool for language vocabulary and other subjects.
 
-Technologies Used
+The app lets a user:
 
-Backend: Flask (Python)
+- Upload flashcards from a CSV file
+- Create individual Q/A cards via a web form
+- Review cards one at a time and track correctness
+- Shuffle the deck for randomized practice
+- Delete all stored flashcards when starting over
 
-Frontend: HTML, CSS, JavaScript
+The project is a work in progress and intentionally written to be readable for other students.
 
-Data Storage: CSV files
+---
 
-Microservices
+## Tech Stack
 
-The application is structured into different microservices to handle various tasks efficiently:
+- **Backend:** Python, Flask, Flask-CORS, pandas  
+- **Frontend:** HTML, minimal inline JavaScript  
+- **Storage:** CSV files (`flashcards.csv`, `shuffled_flashcards.csv`)  
+- **Architecture:** Multiple Flask microservices + a simple UI service
 
-Flashcard Creation Service: Handles creating and storing flashcards in the CSV file.
+---
 
-Flashcard Review Service: Manages the review process, including displaying flashcards, revealing answers, and marking responses as correct or incorrect.
+## Architecture
 
-Flashcard Shuffle Service: Handles shuffling flashcards for a session, ensuring questions and answers remain paired and providing a randomized review experience.
+The application is split into a UI app and four microservices:
 
-Flashcard Deletion Service: Allows users to delete all stored flashcards.
+- `main.py` – UI service  
+  - Serves `index.html`, `create_flashcards.html`, `review_flashcards.html`, `settings.html`, `results.html` on `http://localhost:5000`
 
-Application Structure
+- `flashcard_creation_service.py` (port **5001**)  
+  - Upload flashcards from CSV  
+  - Create new Q/A pairs from a web form  
+  - Persist data to `flashcards.csv`
 
-HTML Files: Provide the user interface for different parts of the application, such as creating flashcards, reviewing them, viewing results, and accessing settings.
+- `flashcard_review_service.py` (port **5002**)  
+  - Serve the “next” flashcard  
+  - Track correct / incorrect / skipped answers  
+  - Expose simple review statistics
 
-JavaScript: Manages user interactions, such as fetching flashcards, revealing answers, shuffling, and submitting responses. All JavaScript is centralized in an external file for maintainability.
+- `flashcard_delete_service.py` (port **5003**)  
+  - Delete all flashcards (reset `flashcards.csv` to just the header row)
 
-CSS: Improves the visual appeal of the application, giving it a modern and clean look. Flashcards are styled to look like real cards, with borders, rounded corners, and shadows.
+- `flashcard_shuffle_service.py` (port **5004**)  
+  - Shuffle the deck while keeping questions and answers paired  
+  - Maintain a “shuffle session” that the UI can query
 
-Backend (Flask Services): Flask routes handle different operations, such as managing flashcards, shuffling sessions, and handling user input.
+The HTML pages interact with these services using `fetch()` calls to the appropriate `localhost` ports.
 
-Installation
+---
 
-Prerequisites
+## Getting Started
 
-Python 3.x
+### Prerequisites
 
-Flask
+- Python 3.8+  
+- `pip` (Python package manager)
 
-Pandas
+### Installation
 
-Instructions
+```bash
+# Clone the repository
+git clone https://github.com/Justin-Schenk/FlashCard_Project.git
+cd FlashCard_Project
 
-Clone the repository:
-
-git clone <repository-url>
-cd flashcard-web-app
-
-Install the required Python packages:
-
-pip install flask pandas
-
-Run the Microservices:
-
-Start each Flask service by navigating to the directory and running:
-
-python flashcard_creation_service.py
-python flashcard_review_service.py
-python flashcard_shuffle_service.py
-python flashcard_delete_service.py
-
-Ensure each service runs on a different port as configured in the files.
-
-Access the Application:
-Open a web browser and navigate to http://localhost:5000 to start using the application.
-
-Usage
-
-Home Page: Provides navigation options to create new flashcards, review existing ones, shuffle the order, or view statistics.
-
-Settings: Access options to delete all flashcards, reset statistics, or start/end a shuffle session.
-
-Review Flashcards: This page shows each flashcard in a "box" styled to look like a card. Users can click "Reveal Answer" to view the answer, and mark their response accordingly.
-
-Visual Design Enhancements
-
-Flashcard Styling: Flashcards are displayed in a box with rounded corners, shadows, and padding to resemble physical cards. (work in progress currently)
-
-Question and Answer: When revealing the answer, the question text is grayed out, and the answer is prominently displayed below to simulate a real flashcard experience.
-
-Buttons and Navigation: The buttons are styled for consistency and ease of use, leveraging CSS or Bootstrap for enhanced visual appeal.
-
-Future Improvements
-
-User Authentication: Allow users to log in and save their progress across sessions.
-
-Category-based Flashcards: Enable users to create flashcards grouped by categories or subjects. Multiple selectable flashcard files seperated by subject.
-
-Export and Import: Add functionality to export flashcards to a file or import from an existing set. Creating more options for multiple subjects or flashcard files.
-
-Progress Analytics: Provide detailed analytics for users to track their performance over time.
-
-Contributing
-
-If you want to contribute to this project, please fork the repository and submit a pull request. Contributions are welcome!
-
-License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Contact
-
-For any questions, suggestions, or issues, please open an issue on the repository or contact me through GitHub.
-
-
+# Install dependencies
+pip install flask flask-cors pandas
